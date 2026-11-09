@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as api from './api.js';
 import BookItem from './BookItem.jsx';
 import AuthScreen from './AuthScreen.jsx';
+import AuthorInput, { fold } from './AuthorInput.jsx';
 
 const collator = new Intl.Collator('ro', { sensitivity: 'base', numeric: true });
 
@@ -66,13 +67,28 @@ function Library({ user, onLogout }) {
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [load]);
 
+  // Cartea tocmai marcată ca citită: îi cerem un comentariu și o ținem vizibilă chiar dacă filtrul e „Necitite”.
+  const [commentPromptId, setCommentPromptId] = useState(null);
+
   const visible = useMemo(() => {
-    const q = query.trim().toLocaleLowerCase('ro');
+    const q = fold(query);
     return books
-      .filter((b) => filter === 'all' || (filter === 'read' ? b.read : !b.read))
-      .filter((b) => !q || `${b.title} ${b.author}`.toLocaleLowerCase('ro').includes(q))
+      .filter((b) => b.id === commentPromptId || filter === 'all' || (filter === 'read' ? b.read : !b.read))
+      .filter((b) => !q || fold(`${b.title} ${b.author}`).includes(q))
       .sort(SORTS[sort].fn);
-  }, [books, sort, filter, query]);
+  }, [books, sort, filter, query, commentPromptId]);
+
+  // Lista autorilor existenți (unici, fără dubluri de scriere), pentru câmpul de autor.
+  const authors = useMemo(() => {
+    const byKey = new Map();
+    for (const b of books) if (b.author && !byKey.has(fold(b.author))) byKey.set(fold(b.author), b.author);
+    return [...byKey.values()].sort(collator.compare);
+  }, [books]);
+
+  function toggleRead(id, read) {
+    updateBook(id, { read });
+    setCommentPromptId(read ? id : null);
+  }
 
   const readCount = books.filter((b) => b.read).length;
 
@@ -81,7 +97,8 @@ function Library({ user, onLogout }) {
     if (!title.trim()) return;
     setAdding(true);
     try {
-      const book = await api.createBook({ title, author });
+      const known = authors.find((a) => fold(a) === fold(author));
+      const book = await api.createBook({ title, author: known || author });
       setBooks((bs) => [...bs, book]);
       setTitle('');
       setAuthor('');
@@ -145,7 +162,7 @@ function Library({ user, onLogout }) {
           onChange={(e) => setTitle(e.target.value)}
           required
         />
-        <input placeholder="Autor" value={author} onChange={(e) => setAuthor(e.target.value)} />
+        <AuthorInput value={author} onChange={setAuthor} authors={authors} />
         <button type="submit" className="primary" disabled={adding || !title.trim()}>
           {adding ? 'Se adaugă…' : 'Adaugă'}
         </button>
@@ -189,11 +206,28 @@ function Library({ user, onLogout }) {
       ) : visible.length === 0 ? (
         <p className="empty">{books.length === 0 ? 'Nicio carte încă. Adaugă prima carte mai sus.' : 'Nicio carte nu corespunde.'}</p>
       ) : (
-        <ul className="book-list">
-          {visible.map((b) => (
-            <BookItem key={b.id} book={b} onUpdate={updateBook} onDelete={removeBook} />
-          ))}
-        </ul>
+        <>
+          <p className="list-count">
+            {visible.length === books.length
+              ? `${books.length} ${books.length === 1 ? 'carte' : 'cărți'} în listă`
+              : `Afișate ${visible.length} din ${books.length}`}
+          </p>
+          <ol className="book-list">
+            {visible.map((b, i) => (
+              <BookItem
+                key={b.id}
+                book={b}
+                number={i + 1}
+                authors={authors}
+                askComment={b.id === commentPromptId}
+                onCommentPromptDone={() => setCommentPromptId(null)}
+                onToggleRead={toggleRead}
+                onUpdate={updateBook}
+                onDelete={removeBook}
+              />
+            ))}
+          </ol>
+        </>
       )}
     </div>
   );
