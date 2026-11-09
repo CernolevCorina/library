@@ -22,6 +22,9 @@ export default function ItemRow({
   const [creator, setCreator] = useState(item.creator || '');
   const [comment, setComment] = useState(item.comment || '');
   const commentRef = useRef(null);
+  // Nota se poate da doar după bifare; ref-ul e citit și la salvarea întârziată a notei.
+  const doneRef = useRef(item.done);
+  doneRef.current = item.done;
   const itemRef = useRef(null);
 
   const expanded = open || askComment;
@@ -132,7 +135,7 @@ export default function ItemRow({
             </span>
           )}
         </button>
-        <ScoreBadge value={item.rating} />
+        {item.done && <ScoreBadge value={item.rating} />}
         <button type="button" className={`chevron ${expanded ? 'up' : ''}`} onClick={toggleOpen} tabIndex={-1} aria-hidden="true">
           <Icon name="chevron" size={18} />
         </button>
@@ -155,7 +158,16 @@ export default function ItemRow({
 
               <section className="detail-section">
                 <span className="field-label">Nota</span>
-                <ScoreInput value={item.rating} onChange={(rating) => onUpdate(item.id, { rating })} />
+                {item.done ? (
+                  <ScoreInput value={item.rating} onChange={(rating) => doneRef.current && onUpdate(item.id, { rating })} />
+                ) : (
+                  <div className="score-locked">
+                    <span>Nota se poate da după bifare.</span>
+                    <button type="button" className="ghost-btn small" onClick={() => onToggleDone(item.id, true)}>
+                      Marchează ca {kind.doneOne}
+                    </button>
+                  </div>
+                )}
               </section>
 
               <section className="detail-section">

@@ -233,7 +233,7 @@ button.danger-outline { color: var(--danger); border-color: color-mix(in srgb, v
 .combo-list li.is-new { color: var(--accent-text); font-weight: 600; }
 
 /* ============ Bara de unelte ============ */
-.toolbar { display: grid; gap: 8px; margin-bottom: 14px; }
+.toolbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-bottom: 14px; }
 .toolbar-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
 .search { position: relative; }
 .search .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--faint); pointer-events: none; }
@@ -261,7 +261,12 @@ button.danger-outline { color: var(--danger); border-color: color-mix(in srgb, v
 .list-count { margin: 0 0 8px 4px; color: var(--faint); font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
 
 /* ============ Elemente ============ */
-.item-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.item-list {
+  list-style: none; padding: 0; margin: 0;
+  display: grid; gap: 8px;
+  /* minmax(0, …): textul lung pe un rând (comentariul) nu are voie să lățească lista */
+  grid-template-columns: minmax(0, 1fr);
+}
 
 .item {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -408,6 +413,14 @@ button.danger-outline { color: var(--danger); border-color: color-mix(in srgb, v
 }
 .score-ticks button:hover { color: var(--text); background: var(--surface); }
 .score-ticks button.on { color: hsl(var(--h) 70% var(--score-text-l)); }
+
+.score-locked {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
+  padding: 12px 14px; border-radius: var(--radius-sm);
+  background: var(--surface-2); color: var(--muted); font-size: 0.9rem;
+}
+.score-locked .ghost-btn { color: var(--accent-text); font-weight: 600; font-size: 0.85rem; }
+.score-locked .ghost-btn:hover { background: var(--accent-soft); color: var(--accent-text); }
 
 /* ============ Stări ============ */
 .empty { text-align: center; color: var(--muted); padding: 40px 16px; }

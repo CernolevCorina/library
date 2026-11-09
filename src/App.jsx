@@ -10,6 +10,8 @@ import { formatScore } from './Score.jsx';
 
 const collator = new Intl.Collator('ro', { sensitivity: 'base', numeric: true });
 const byTitle = (a, b) => collator.compare(a.title, b.title);
+// Nota contează doar pentru elementele bifate.
+const scoreOf = (b) => (b.done ? b.rating : 0);
 
 function sorts(k) {
   return {
@@ -18,7 +20,7 @@ function sorts(k) {
       label: k.creator,
       fn: (a, b) => collator.compare(a.creator || '￿', b.creator || '￿') || byTitle(a, b),
     },
-    rating: { label: 'Nota', fn: (a, b) => b.rating - a.rating || byTitle(a, b) },
+    rating: { label: 'Nota', fn: (a, b) => scoreOf(b) - scoreOf(a) || byTitle(a, b) },
     todo: { label: `${k.todo} întâi`, fn: (a, b) => Number(a.done) - Number(b.done) || byTitle(a, b) },
     done: { label: `${k.done} întâi`, fn: (a, b) => Number(b.done) - Number(a.done) || byTitle(a, b) },
     recent: { label: 'Adăugate recent', fn: (a, b) => (b.createdAt || '').localeCompare(a.createdAt || '') },
@@ -233,7 +235,7 @@ function ListView({ list, onEditList, onCount, onError }) {
   }, [items]);
 
   const doneCount = items.filter((b) => b.done).length;
-  const rated = items.filter((b) => b.rating > 0);
+  const rated = items.filter((b) => scoreOf(b) > 0);
   const average = rated.length ? Math.round((rated.reduce((s, b) => s + b.rating, 0) / rated.length) * 10) / 10 : 0;
   const progress = items.length ? Math.round((doneCount / items.length) * 100) : 0;
 

@@ -12,6 +12,9 @@ export default async function handler(req, res) {
       if (!existing) return res.status(404).json({ error: 'Elementul nu există' });
       const item = sanitizeItem(req.body || {}, existing);
       if (!item.title) return res.status(400).json({ error: 'Titlul este obligatoriu' });
+      if ('rating' in (req.body || {}) && item.rating > 0 && !item.done) {
+        return res.status(400).json({ error: 'Poți da o notă doar după ce bifezi elementul' });
+      }
       item.updatedAt = new Date().toISOString();
       return res.status(200).json(await saveItem(user.id, listId, item));
     }

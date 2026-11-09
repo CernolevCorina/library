@@ -13,6 +13,7 @@ export default async function handler(req, res) {
     }
     if (req.method === 'POST') {
       const item = sanitizeItem(req.body || {}, { creator: '', done: false, rating: 0, comment: '' });
+      if (!item.done) item.rating = 0; // nota doar pentru elementele bifate
       if (!item.title) return res.status(400).json({ error: 'Titlul este obligatoriu' });
       const now = new Date().toISOString();
       item.id = randomUUID();
