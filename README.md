@@ -28,6 +28,9 @@ După 10 încercări greșite de logare, contul e blocat 15 minute.
 npm install
 npm i -g vercel
 vercel link        # leagă folderul de proiectul Vercel
-vercel env pull    # descarcă variabilele în .env.local
-npm run dev        # pornește UI + API pe http://localhost:3000
+vercel env pull .env.development.local   # descarcă variabilele bazei de date
+npm run dev:full   # pornește UI + API pe http://localhost:3000 (prin vercel dev)
+```
+
+`npm run dev` pornește doar interfața (Vite), fără API.
 ```
