@@ -1,15 +1,20 @@
-# Biblioteca mea
+# Listele mele
 
-Aplicație React pentru lista de cărți: adăugare, bifă „citită”, comentarii, căutare, filtrare și ordonare după autor / denumire / citite / necitite.
+Aplicație React pentru liste de orice: cărți, jocuri, energizante, filme etc. Fiecare listă are un tip care dă denumirile
+(„Autor” / „Brand” / „Studio”, „Citite” / „Jucate” / „Încercate”…). Elementele au titlu, creator, bifă, rating 1–5 stele și comentariu,
+plus căutare, filtrare și ordonare.
 
-Fiecare utilizator își creează un cont (înregistrare / logare) și are propria listă de cărți.
+Fiecare utilizator își creează un cont (înregistrare / logare) și are propriile liste.
 Datele se păstrează pe server (Upstash Redis prin Vercel), nu în browser, deci vezi aceeași listă pe orice dispozitiv pe care te loghezi.
 
 ## Structură
 
 - `src/` – interfața React (Vite)
 - `api/auth/[action].js` – `POST /api/auth/register`, `/login`, `/logout`, `GET /api/auth/me`
-- `api/books/` – `GET/POST /api/books`, `PATCH/DELETE /api/books/:id` (doar cărțile utilizatorului logat)
+- `api/lists/` – `GET/POST /api/lists`, `PATCH/DELETE /api/lists/:listId`
+- `api/lists/[listId]/items/` – `GET/POST /api/lists/:listId/items`, `PATCH/DELETE /api/lists/:listId/items/:id`
+
+La prima deschidere după actualizare, cărțile vechi sunt mutate automat în lista „Cărți” (nimic nu se pierde).
 
 Parolele sunt salvate ca hash scrypt cu salt. Sesiunea e un cookie `HttpOnly` (valabil 180 de zile) cu un token aleator păstrat în Redis.
 După 10 încercări greșite de logare, contul e blocat 15 minute.

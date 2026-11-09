@@ -15,14 +15,21 @@ async function request(url, options = {}) {
 }
 
 const post = (url, body) => request(url, { method: 'POST', body: JSON.stringify(body ?? {}) });
+const patch = (url, body) => request(url, { method: 'PATCH', body: JSON.stringify(body) });
+const del = (url) => request(url, { method: 'DELETE' });
+const enc = encodeURIComponent;
 
 export const me = () => request('/api/auth/me');
 export const login = (username, password) => post('/api/auth/login', { username, password });
 export const register = (username, password) => post('/api/auth/register', { username, password });
 export const logout = () => post('/api/auth/logout');
 
-export const listBooks = () => request('/api/books');
-export const createBook = (book) => post('/api/books', book);
-export const updateBook = (id, patch) =>
-  request(`/api/books/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(patch) });
-export const deleteBook = (id) => request(`/api/books/${encodeURIComponent(id)}`, { method: 'DELETE' });
+export const listLists = () => request('/api/lists');
+export const createList = (list) => post('/api/lists', list);
+export const updateList = (id, changes) => patch(`/api/lists/${enc(id)}`, changes);
+export const deleteList = (id) => del(`/api/lists/${enc(id)}`);
+
+export const listItems = (listId) => request(`/api/lists/${enc(listId)}/items`);
+export const createItem = (listId, item) => post(`/api/lists/${enc(listId)}/items`, item);
+export const updateItem = (listId, id, changes) => patch(`/api/lists/${enc(listId)}/items/${enc(id)}`, changes);
+export const deleteItem = (listId, id) => del(`/api/lists/${enc(listId)}/items/${enc(id)}`);

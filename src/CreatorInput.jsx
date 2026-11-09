@@ -5,25 +5,25 @@ export const fold = (s) =>
   (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('ro').trim();
 
 /**
- * Câmp de autor de tip „select sau creează”:
- * arată autorii existenți care se potrivesc cu ce scrii; dacă nu există, îl adaugi pe cel scris.
+ * Câmp de tip „select sau creează” (autor, brand, studio…):
+ * arată valorile existente care se potrivesc cu ce scrii; dacă nu există, o adaugi pe cea scrisă.
  */
-export default function AuthorInput({ value, onChange, authors, placeholder = 'Autor' }) {
+export default function CreatorInput({ value, onChange, options: known, placeholder = 'Creator' }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const inputRef = useRef(null);
   const listId = useId();
 
   const typed = value.trim();
-  const exact = authors.find((a) => fold(a) === fold(typed));
+  const exact = known.find((a) => fold(a) === fold(typed));
 
   const options = useMemo(() => {
     const q = fold(value);
-    const matches = authors.filter((a) => !q || fold(a).includes(q)).slice(0, 8);
+    const matches = known.filter((a) => !q || fold(a).includes(q)).slice(0, 8);
     const items = matches.map((a) => ({ label: a, value: a }));
-    if (typed && !exact) items.push({ label: `Adaugă autor nou: „${typed}”`, value: typed, isNew: true });
+    if (typed && !exact) items.push({ label: `Adaugă nou: „${typed}”`, value: typed, isNew: true });
     return items;
-  }, [authors, value, typed, exact]);
+  }, [known, value, typed, exact]);
 
   function pick(option) {
     onChange(option.value);
@@ -51,7 +51,7 @@ export default function AuthorInput({ value, onChange, authors, placeholder = 'A
     }
   }
 
-  // Dacă ai scris un autor care există deja (cu altă scriere), folosește forma existentă.
+  // Dacă ai scris o valoare care există deja (cu altă scriere), folosește forma existentă.
   function onBlur() {
     setOpen(false);
     setActive(-1);
@@ -67,6 +67,7 @@ export default function AuthorInput({ value, onChange, authors, placeholder = 'A
         ref={inputRef}
         value={value}
         placeholder={placeholder}
+        aria-label={placeholder}
         autoComplete="off"
         role="combobox"
         aria-expanded={showList}
@@ -86,7 +87,7 @@ export default function AuthorInput({ value, onChange, authors, placeholder = 'A
         <button
           type="button"
           className="combo-clear"
-          aria-label="Șterge autorul"
+          aria-label={`Șterge ${placeholder.toLowerCase()}`}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => { onChange(''); inputRef.current?.focus(); }}
         >

@@ -39,7 +39,8 @@ export default function AuthScreen({ onAuth }) {
   return (
     <div className="app">
       <form className="card auth" onSubmit={submit}>
-        <h1>Biblioteca mea</h1>
+        <h1><span className="brand-mark" aria-hidden="true">✓</span>Listele mele</h1>
+        <p className="hint">Cărți, jocuri, energizante sau orice vrei să ții minte — cu note și comentarii.</p>
 
         <div className="segmented" role="tablist">
           <button type="button" role="tab" aria-selected={!isRegister} className={!isRegister ? 'active' : ''} onClick={() => switchMode('login')}>
